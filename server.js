@@ -4,6 +4,13 @@ const TARGET = 'https://api.bitnob.com';
 const PORT = process.env.PORT || 3001;
 
 const server = http.createServer(async (req, res) => {
+  // Health check — don't forward to Bitnob
+  if (req.url === '/' || req.url === '/health') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ status: 'ok', service: 'cashpay-bitnob-proxy' }));
+    return;
+  }
+
   const url = TARGET + req.url;
 
   const headers = { ...req.headers };
