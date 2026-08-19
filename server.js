@@ -5,21 +5,14 @@ const PORT = process.env.PORT || 3001;
 
 const server = http.createServer(async (req, res) => {
   if (req.url === '/' || req.url === '/health') {
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ status: 'ok', service: 'cashpay-bitnob-proxy' }));
-    return;
-  }
-
-  // Temporarily: shows Render's actual outbound IP
-  if (req.url === '/my-ip') {
     try {
       const r = await fetch('https://api.ipify.org?format=json');
       const ip = await r.json();
       res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify(ip));
-    } catch (err) {
-      res.writeHead(500, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ error: err.message }));
+      res.end(JSON.stringify({ status: 'ok', service: 'cashpay-bitnob-proxy', outboundIp: ip.ip }));
+    } catch {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ status: 'ok', service: 'cashpay-bitnob-proxy', outboundIp: 'unknown' }));
     }
     return;
   }
