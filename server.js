@@ -43,9 +43,16 @@ const server = http.createServer(async (req, res) => {
       }
       const response = await fetch(url, options);
       const responseHeaders = {};
-      response.headers.forEach((value, key) => { responseHeaders[key] = value; });
+      response.headers.forEach((value, key) => {
+        // Node fetch() auto-decompresses gzip/br/deflate — forwarding
+        // the original content-encoding/length would corrupt the body
+        const k = key.toLowerCase();
+        if (k === 'content-encoding' || k === 'content-length') return;
+        responseHeaders[key] = value;
+      });
+      const responseBody = await response.text();
       res.writeHead(response.status, responseHeaders);
-      res.end(await response.text());
+      res.end(responseBody);
     } catch (err) {
       console.error('[proxy] error:', err.message);
       res.writeHead(502, { 'Content-Type': 'application/json' });
