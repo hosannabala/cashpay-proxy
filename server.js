@@ -22,6 +22,15 @@ const server = http.createServer(async (req, res) => {
   const headers = { ...req.headers };
   delete headers['host'];
   delete headers['connection'];
+  // Strip IP-leaking headers — Render's load balancer injects these
+  // with the original client IP, and Bitnob checks them for whitelisting
+  delete headers['x-forwarded-for'];
+  delete headers['x-real-ip'];
+  delete headers['x-forwarded-proto'];
+  delete headers['x-forwarded-host'];
+  delete headers['forwarded'];
+  delete headers['cf-connecting-ip'];
+  delete headers['true-client-ip'];
   headers['host'] = 'api.bitnob.com';
 
   let body = '';
